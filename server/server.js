@@ -6,7 +6,11 @@ const { post } = require("axios");
 
 const app = express();
 
-app.use(cors());
+app.use(cors(
+    {
+        origin: "http://vps-1ba6b25b.vps.ovh.net/"
+    }
+));
 
 const VIDEO_ID = process.env.VDOCIPHER_VIDEO_ID;
 

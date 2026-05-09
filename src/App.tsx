@@ -11,7 +11,8 @@ function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/otp")
+      // .get("http://localhost:3001/otp")
+      .get("/vdocipher-api/otp")
       .then((res) => {
         setData(res.data);
       })
