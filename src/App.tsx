@@ -397,9 +397,9 @@ function App() {
       const VdoPlayer = (window as any).VdoPlayer;
       console.log("VdoPlayer", VdoPlayer);
       console.log("Iframe Ref", iframeRef.current);
-      if (VdoPlayer && iframeRef.current) {
+      if (iframeRef.current) {
         // Create the instance once the script is ready and iframe exists
-        const player = window.VdoPlayer.getInstance(iframeRef.current);
+        const player = VdoPlayer.getInstance(iframeRef.current);
         console.log("VdoPlayer Instance", player);
         // playerInstance.current = player;
         // Listen for metadata to be loaded so we can seek to the saved time
