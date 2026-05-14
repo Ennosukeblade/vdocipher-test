@@ -148,6 +148,103 @@
 
 // export default App;
 
+// import { useEffect, useRef, useState } from "react";
+// import axios from "axios";
+
+// type OTPResponse = {
+//   otp: string;
+//   playbackInfo: string;
+// };
+
+// declare global {
+//   interface Window {
+//     VdoPlayer: any;
+//   }
+// }
+
+// function App() {
+//   const [data, setData] = useState<OTPResponse | null>(null);
+
+//   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+//   // Fetch OTP
+//   useEffect(() => {
+//     axios
+//       .get("/vdocipher-api/otp")
+//       .then((res) => {
+//         setData(res.data);
+//       })
+//       .catch(console.error);
+//   }, []);
+
+//   // Load script once
+//   useEffect(() => {
+//     const script = document.createElement("script");
+
+//     script.src = "https://player.vdocipher.com/v2/api.js";
+
+//     script.async = true;
+
+//     document.body.appendChild(script);
+
+//     return () => {
+//       document.body.removeChild(script);
+//     };
+//   }, []);
+
+//   // Initialize player
+//   useEffect(() => {
+//     if (!data || !iframeRef.current || !window.VdoPlayer)
+//       return;
+
+//     const iframe = iframeRef.current;
+
+//     iframe.src = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}`;
+
+//     iframe.onload = () => {
+//       const player =
+//         window.VdoPlayer.getInstance(iframe.contentWindow);
+
+//       player.video.addEventListener(
+//         "loadedmetadata",
+//         () => {
+//           // Resume timestamp
+//           player.video.currentTime = 30;
+//         }
+//       );
+
+//       // Track progress
+//       setInterval(() => {
+//         console.log(player.video.currentTime);
+//       }, 5000);
+//     };
+//   }, [data]);
+
+//   if (!data) {
+//     return <div>Loading...</div>;
+//   }
+
+//   return (
+//     <div style={{ padding: 40 }}>
+//       <h1>VdoCipher Test</h1>
+
+//       <iframe
+//         ref={iframeRef}
+//         allowFullScreen
+//         allow="encrypted-media"
+//         style={{
+//           width: "100%",
+//           maxWidth: "900px",
+//           aspectRatio: "16 / 9",
+//           border: "none",
+//         }}
+//       />
+//     </div>
+//   );
+// }
+
+// export default App;
+
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
@@ -158,7 +255,7 @@ type OTPResponse = {
 
 declare global {
   interface Window {
-    VdoPlayer: any;
+    onVdoCipherAPIReady: (vdoPlayer: any) => void;
   }
 }
 
@@ -166,6 +263,9 @@ function App() {
   const [data, setData] = useState<OTPResponse | null>(null);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Example saved progress from DB
+  const savedProgress = 30;
 
   // Fetch OTP
   useEffect(() => {
@@ -177,45 +277,25 @@ function App() {
       .catch(console.error);
   }, []);
 
-  // Load script once
+  // Initialize API callbacks
   useEffect(() => {
-    const script = document.createElement("script");
+    if (!data) return;
 
-    script.src = "https://player.vdocipher.com/v2/api.js";
+    window.onVdoCipherAPIReady = (player) => {
+      console.log("Player Ready");
 
-    script.async = true;
+      // Seek to saved timestamp
+      player.seek(savedProgress);
 
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  // Initialize player
-  useEffect(() => {
-    if (!data || !iframeRef.current || !window.VdoPlayer)
-      return;
-
-    const iframe = iframeRef.current;
-
-    iframe.src = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}`;
-
-    iframe.onload = () => {
-      const player =
-        window.VdoPlayer.getInstance(iframe.contentWindow);
-
-      player.video.addEventListener(
-        "loadedmetadata",
-        () => {
-          // Resume timestamp
-          player.video.currentTime = 30;
-        }
-      );
+      // Optional autoplay
+      player.play();
 
       // Track progress
       setInterval(() => {
-        console.log(player.video.currentTime);
+        console.log(
+          "Current Time:",
+          player.api.getCurrentTime()
+        );
       }, 5000);
     };
   }, [data]);
@@ -224,14 +304,17 @@ function App() {
     return <div>Loading...</div>;
   }
 
+  const iframeSrc = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}&player=1`;
+
   return (
     <div style={{ padding: 40 }}>
-      <h1>VdoCipher Test</h1>
+      <h1>VdoCipher Resume Test</h1>
 
       <iframe
         ref={iframeRef}
-        allowFullScreen
+        src={iframeSrc}
         allow="encrypted-media"
+        allowFullScreen
         style={{
           width: "100%",
           maxWidth: "900px",
