@@ -304,7 +304,7 @@ function App() {
     return <div>Loading...</div>;
   }
 
-  const iframeSrc = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}&player=1`;
+  const iframeSrc = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}`;
 
   return (
     <div style={{ padding: 40 }}>
