@@ -203,7 +203,7 @@ function App() {
 
     iframe.onload = () => {
       const player =
-        window.VdoPlayer.getInstance(iframe);
+        window.VdoPlayer.getInstance(iframe.contentWindow);
 
       player.video.addEventListener(
         "loadedmetadata",
