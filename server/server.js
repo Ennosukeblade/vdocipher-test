@@ -8,7 +8,7 @@ const app = express();
 
 app.use(cors(
     {
-        origin: "http://vps-1ba6b25b.vps.ovh.net/"
+        origin: "https://vps-1ba6b25b.vps.ovh.net/"
     }
 ));
 
