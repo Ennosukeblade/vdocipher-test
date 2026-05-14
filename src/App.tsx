@@ -339,7 +339,7 @@
 //         ref={iframeRef}
 //         src={iframeSrc}
 //         allow="encrypted-media"
-        
+
 //         allowFullScreen
 //         style={{
 //           width: "100%",
@@ -375,8 +375,8 @@ declare global {
 function App() {
   const [data, setData] = useState<OTPResponse | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const playerInstance = useRef<any>(null);
-  
+  // const playerInstance = useRef<any>(null);
+
   const savedProgress = 60; // Example: 60 seconds from your database
 
   // 2. Fetch OTP and Playback Info
@@ -393,10 +393,12 @@ function App() {
 
     // This is the function VdoCipher calls once the script is ready
     window.onVdoPlayerV2APIReady = () => {
-      if (iframeRef.current) {
+      // The script is "ready", but let's make sure the object is there
+      const VdoPlayer = (window as any).VdoPlayer;
+      if (VdoPlayer && iframeRef.current) {
         // Create the instance once the script is ready and iframe exists
         const player = window.VdoPlayer.getInstance(iframeRef.current);
-        playerInstance.current = player;
+        // playerInstance.current = player;
 
         // Listen for metadata to be loaded so we can seek to the saved time
         player.video.addEventListener("loadedmetadata", () => {
