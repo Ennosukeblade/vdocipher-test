@@ -363,12 +363,24 @@ type OTPResponse = {
   playbackInfo: string;
 };
 
+// declare global {
+//   interface Window {
+//     onVdoPlayerV2APIReady: () => void;
+//     // VdoPlayer: {
+//     //   getInstance: (iframe: HTMLIFrameElement) => any;
+//     // };
+//   }
+// }
+// declare global {
+//   interface Window {
+//     VdoPlayer: any;
+//   }
+// }
+
 declare global {
   interface Window {
     onVdoPlayerV2APIReady: () => void;
-    VdoPlayer: {
-      getInstance: (iframe: HTMLIFrameElement) => any;
-    };
+    VdoPlayer: any; // Or your specific interface
   }
 }
 
@@ -388,34 +400,83 @@ function App() {
   }, []);
 
   // 3. Load Script and Initialize Player
+  // useEffect(() => {
+  //   if (!data) return;
+
+  //   // This is the function VdoCipher calls once the script is ready
+  //   window.onVdoPlayerV2APIReady = () => {
+  //     // The script is "ready", but let's make sure the object is there
+  //     // const VdoPlayer = (window as any).VdoPlayer;
+  //     console.log("VdoPlayer", window.VdoPlayer);
+  //     console.log("Iframe Ref", iframeRef.current);
+  //     if (iframeRef.current) {
+  //       // Create the instance once the script is ready and iframe exists
+  //       const player = window.VdoPlayer.getInstance(iframeRef.current);
+  //       console.log("VdoPlayer Instance", player);
+  //       // playerInstance.current = player;
+  //       // Listen for metadata to be loaded so we can seek to the saved time
+  //       player.video.addEventListener("loadedmetadata", () => {
+  //         console.log("Metadata loaded, seeking to:", savedProgress);
+  //         player.video.currentTime = savedProgress;
+  //       });
+
+  //       // Example: Track progress every few seconds
+  //       player.video.addEventListener("timeupdate", () => {
+  //         // You can save this to your DB occasionally
+  //         // console.log("Current Time:", player.video.currentTime);
+  //       });
+  //     }
+  //   };
+
+  //   const script = document.createElement("script");
+  //   script.src = "https://player.vdocipher.com/v2/api.js";
+  //   script.async = true;
+  //   document.body.appendChild(script);
+
+  //   return () => {
+  //     document.body.removeChild(script);
+  //     delete (window as any).onVdoPlayerV2APIReady;
+  //   };
+  // }, [data]); // Re-run when data is available to ensure iframe is in DOM
+
   useEffect(() => {
     if (!data) return;
 
-    // This is the function VdoCipher calls once the script is ready
     window.onVdoPlayerV2APIReady = () => {
-      // The script is "ready", but let's make sure the object is there
-      const VdoPlayer = (window as any).VdoPlayer;
-      console.log("VdoPlayer", VdoPlayer);
-      console.log("Iframe Ref", iframeRef.current);
-      if (iframeRef.current) {
-        // Create the instance once the script is ready and iframe exists
-        const player = VdoPlayer.getInstance(iframeRef.current);
-        console.log("VdoPlayer Instance", player);
-        // playerInstance.current = player;
-        // Listen for metadata to be loaded so we can seek to the saved time
-        player.video.addEventListener("loadedmetadata", () => {
-          console.log("Metadata loaded, seeking to:", savedProgress);
-          player.video.currentTime = savedProgress;
-        });
+      console.log("API Ready signal received...");
 
-        // Example: Track progress every few seconds
-        player.video.addEventListener("timeupdate", () => {
-          // You can save this to your DB occasionally
-          // console.log("Current Time:", player.video.currentTime);
-        });
-      }
+      // 1. Create a poller to wait for the object to actually exist
+      const interval = setInterval(() => {
+        if (window.VdoPlayer && iframeRef.current) {
+          clearInterval(interval); // Stop checking
+
+          console.log("VdoPlayer found, initializing instance...");
+
+          try {
+            const player = window.VdoPlayer.getInstance(iframeRef.current);
+
+            // 2. Use 'canplay' instead of 'loadedmetadata' for more reliable seeking
+            player.video.addEventListener("canplay", () => {
+              console.log("Seeking to:", savedProgress);
+              player.video.currentTime = savedProgress;
+            }, { once: true });
+
+            // Optional: Error handling
+            player.video.addEventListener("error", (e: any) => {
+              console.error("VdoPlayer Error:", e);
+            });
+
+          } catch (err) {
+            console.error("Failed to get VdoPlayer instance:", err);
+          }
+        }
+      }, 50); // Check every 50ms
+
+      // Timeout after 5 seconds so it doesn't run forever if something fails
+      setTimeout(() => clearInterval(interval), 5000);
     };
 
+    // 3. Inject Script
     const script = document.createElement("script");
     script.src = "https://player.vdocipher.com/v2/api.js";
     script.async = true;
@@ -425,7 +486,7 @@ function App() {
       document.body.removeChild(script);
       delete (window as any).onVdoPlayerV2APIReady;
     };
-  }, [data]); // Re-run when data is available to ensure iframe is in DOM
+  }, [data]);
 
   if (!data) return <div>Loading Player...</div>;
 
