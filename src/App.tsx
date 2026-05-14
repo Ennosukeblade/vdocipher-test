@@ -19,11 +19,41 @@ function App() {
       .catch(console.error);
   }, []);
 
+  const initializePlayer = () => {
+    // @ts-ignore
+    const player = new VdoPlayer({
+      otp: data?.otp,
+      playbackInfo: data?.playbackInfo,
+      container: document.querySelector("#vdocipher-player"),
+    });
+
+    player.addEventListener("ready", () => {
+      player.seek(30); // Seek to 30 seconds
+    });
+  };
+
+  useEffect(() => {
+    const script = document.createElement("script");
+
+    script.src = "https://player.vdocipher.com/v2/api.js";
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      initializePlayer();
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   if (!data) {
     return <div>Loading...</div>;
   }
 
-  const iframeSrc = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}`;
+  // const iframeSrc = `https://player.vdocipher.com/v2/?otp=${data.otp}&playbackInfo=${data.playbackInfo}`;
 
   return (
     <div
@@ -33,7 +63,7 @@ function App() {
     >
       <h1>VdoCipher Test</h1>
 
-      <iframe
+      {/* <iframe
         src={iframeSrc}
         allowFullScreen
         allow="encrypted-media"
@@ -43,7 +73,15 @@ function App() {
           aspectRatio: "16 / 9",
           border: "none",
         }}
-      />
+      /> */}
+      <div id="vdocipher-player"
+        style={{
+          width: "100%",
+          maxWidth: "900px",
+          aspectRatio: "16 / 9",
+          border: "none",
+        }}
+      ></div>
     </div>
   );
 }

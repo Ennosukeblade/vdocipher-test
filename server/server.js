@@ -21,6 +21,17 @@ app.get("/otp", async (req, res) => {
             `https://dev.vdocipher.com/api/videos/${VIDEO_ID}/otp`,
             {
                 ttl: 300,
+                annotate: JSON.stringify([
+                    {
+                        type: "rtext",
+                        text: "User: test@example.com",
+                        alpha: "0.12",
+                        color: "0xFFFFFF",
+                        size: "8",
+                        interval: "5000",
+                        skip: "5000"
+                    }
+                ])
             },
             {
                 headers: {
