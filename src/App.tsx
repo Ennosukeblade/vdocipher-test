@@ -5,8 +5,8 @@ import LivePage from "./features/live/LivePage"
 const App = () => {
   return (
     <Routes>
-      <Route path="/vdocipher/" element={<VideoPage />} />
-      <Route path="/vdocipher/live" element={<LivePage />} />
+      <Route path="/" element={<VideoPage />} />
+      <Route path="/live" element={<LivePage />} />
     </Routes>
   )
 }
