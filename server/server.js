@@ -50,6 +50,29 @@ app.get("/otp", async (req, res) => {
     }
 });
 
+app.get("/live", async (req, res) => {
+    try {
+        console.log("Get Request Established")
+        const response = await get(
+            "https://www.vdocipher.com/api/livestream/",
+            {
+                headers: {
+                    Authorization: `Apisecret ${process.env.VDOCIPHER_API_SECRET}`,
+                },
+            }
+        );
+
+        res.json(response.data);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+
+        res.status(500).json({
+            error: "Failed to fetch livestream details",
+        });
+    }
+});
+
+
 app.listen(3001, "0.0.0.0", () => {
     console.log("Server running on port 3001");
 });
