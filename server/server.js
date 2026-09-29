@@ -6,9 +6,11 @@ const { post, get } = require("axios");
 
 const app = express();
 
+const BASE_URL = process.env.VDOCIPHER_BASE_URL || "http://localhost:3001";
+
 app.use(cors(
     {
-        origin: "https://vps-1ba6b25b.vps.ovh.net/"
+        origin: BASE_URL
     }
 ));
 

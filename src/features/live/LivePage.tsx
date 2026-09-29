@@ -5,7 +5,7 @@ type liveResponse = {
         {
             streamId: string
             title: string
-            chatMode: string
+            chatMode: "on" | "off"
             createdAt: number
             status: string
         },
@@ -13,13 +13,13 @@ type liveResponse = {
             id: string
             status: string  // "Preparing" | "Ready to Start Broadcasting" | "Streaming Active" | "Disconnected" | "Closed"
             createdAt: number
-            streamDuration: 0,
+            streamDuration: number
             title: string
             viewerCount: number
-            viewerLastUpdate: 1704396371848,
-            serverKey: "__________",
-            server: "rtmp://________:1935/livestream",
-            chatMode: "off"   // "off" | "anonymous" | "authenticated"
+            viewerLastUpdate: number
+            serverKey: string
+            server: string
+            chatMode: "on" | "off"
         }
     ]
 }
